@@ -1,6 +1,6 @@
 import React from "react";
 
-const Table = ({ data, sortData, sortlogic }) => {
+const Table = ({ data, sortData }) => {
 
     return (
         <table border="1" cellPadding="5" cellSpacing="0">

@@ -208,16 +208,27 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState([]);
 
-  const [sortlogic, setsortlogic] = useState({ key: null, direction: 'asc' });
+  const [sortlogic, setsortlogic] = useState({ columnvalue: null, way: 'asc' });
 
   useEffect(() => {
     const finalterm = searchTerm.toLowerCase();
     const filtered = data.filter((x) =>
-      Object.keys(x).some(
-        (key) =>
-          typeof x[key] === "string" &&
-          x[key].toLowerCase().includes(finalterm)
-      )
+      Object.keys(x).some((key) => {
+        const value = x[key];
+        if (typeof value === 'string')
+          return value.toLowerCase().includes(finalterm);
+
+        if (typeof value === 'number') {
+          return value.toString().includes(finalterm);
+        }
+        if (typeof value === 'boolean') {
+          return (value ? "yes" : "no").includes(finalterm);
+        }
+        if (value instanceof Date) {
+          return value.toLocaleDateString().includes(finalterm) || value.toLocaleString().includes(finalterm);
+        }
+        return false;
+      })
     );
     setFilteredData(filtered);
   }, [searchTerm, data]);
@@ -228,16 +239,20 @@ function App() {
 
   const sortData = (key) => {
     let direction = 'asc';
-    if (sortlogic.key === key && sortlogic.direction === 'asc') {
-      direction = 'desc';
+    if (sortlogic.columnvalue === key) {
+      if (sortlogic.way === 'asc')
+        direction = 'desc';
     }
     setsortlogic({ key, direction });
     const sortedData = [...filteredData].sort((a, b) => {
       if (a[key] < b[key]) {
-        return direction === 'asc' ? -1 : 1;
+        if (direction === 'asc') return -1;
+        else return 1;
+
       }
       if (a[key] > b[key]) {
-        return direction === 'asc' ? 1 : -1;
+        if (direction === 'asc') return -1;
+        else return 1;
       }
       return 0;
     });
