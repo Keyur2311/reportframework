@@ -1,10 +1,9 @@
-
 import './App.css';
 import { useState, useEffect } from 'react';
 import Table from './components/Table';
 import StringFilter from './components/StringFilter';
-function App() {
 
+function App() {
   const tempdata = [
     {
       id: 1,
@@ -203,14 +202,11 @@ function App() {
     }
   ];
 
-  // console.log(tempdata);
-
-  const data = tempdata
+  const [data, setData] = useState(tempdata);
+  // let data = tempdata;
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
-
+  const [filteredData, setFilteredData] = useState(tempdata);
   const [sortlogic, setsortlogic] = useState({ columnvalue: null, way: 'asc' });
-
   const [searchFilter, setSearchFilter] = useState({ filterType: "contains", filterValue: "" });
 
   useEffect(() => {
@@ -229,13 +225,12 @@ function App() {
         return false;
       });
 
-
       return matchesSearch;
     });
     setFilteredData(filtered);
   }, [searchTerm, data]);
 
-  useEffect(() => {
+  const applyStringFilter = () => {
     const { filterType, filterValue } = searchFilter;
     const filtered = data.filter((item) => {
       return Object.keys(item).some((key) => {
@@ -264,13 +259,11 @@ function App() {
       });
     });
     setFilteredData(filtered);
-  }, [searchFilter, data]);
-
+  };
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
-
 
   const sortData = (key) => {
     let direction = 'asc';
@@ -278,16 +271,15 @@ function App() {
       if (sortlogic.way === 'asc')
         direction = 'desc';
     }
-    setsortlogic({ key, direction });
+    setsortlogic({ columnvalue: key, way: direction });
     const sortedData = [...filteredData].sort((a, b) => {
       if (a[key] < b[key]) {
         if (direction === 'asc') return -1;
         else return 1;
-
       }
       if (a[key] > b[key]) {
-        if (direction === 'asc') return -1;
-        else return 1;
+        if (direction === 'asc') return 1;
+        else return -1;
       }
       return 0;
     });
@@ -297,8 +289,6 @@ function App() {
   const handleSearchFilterChange = (filterType, filterValue) => {
     setSearchFilter({ filterType, filterValue });
   };
-
-
 
   return (
     <div className="App">
@@ -311,7 +301,7 @@ function App() {
       />
       <h4> TIP :- to do any sort on column click on that column</h4>
       <StringFilter onFilterChange={handleSearchFilterChange} />
-      {/* <button onClick={applyStringFilter}>Apply String Filter</button> */}
+      <button onClick={applyStringFilter}>Apply String Filter</button>
       <Table data={filteredData} sortData={sortData} sortlogic={sortlogic} />
     </div>
   );
