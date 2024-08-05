@@ -202,13 +202,13 @@ function App() {
     }
   ];
 
-  console.log(tempdata);
+  // console.log(tempdata);
 
   const [data, setData] = useState(tempdata);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState([]);
 
-
+  const [sortlogic, setsortlogic] = useState({ key: null, direction: 'asc' });
 
   useEffect(() => {
     const finalterm = searchTerm.toLowerCase();
@@ -226,6 +226,25 @@ function App() {
     setSearchTerm(event.target.value);
   };
 
+  const sortData = (key) => {
+    let direction = 'asc';
+    if (sortlogic.key === key && sortlogic.direction === 'asc') {
+      direction = 'desc';
+    }
+    setsortlogic({ key, direction });
+    const sortedData = [...filteredData].sort((a, b) => {
+      if (a[key] < b[key]) {
+        return direction === 'asc' ? -1 : 1;
+      }
+      if (a[key] > b[key]) {
+        return direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+    setFilteredData(sortedData);
+  };
+
+
   return (
     <div className="App">
       <input
@@ -235,8 +254,8 @@ function App() {
         onChange={handleSearchChange}
         style={{ marginBottom: "20px", padding: "5px" }}
       />
-
-      <Table data={filteredData} />
+      <h4> TIP :- to do any sort on column click on that column</h4>
+      <Table data={filteredData} sortData={sortData} sortlogic={sortlogic} />
     </div>
   );
 }
