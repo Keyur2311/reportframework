@@ -205,7 +205,7 @@ function App() {
 
   // console.log(tempdata);
 
-  const [data, setData] = useState(tempdata);
+  const data = tempdata
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState([]);
 
