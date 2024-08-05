@@ -2,6 +2,7 @@
 import './App.css';
 import { useState, useEffect } from 'react';
 import Table from './components/Table';
+import StringFilter from './components/StringFilter';
 function App() {
 
   const tempdata = [
@@ -210,32 +211,66 @@ function App() {
 
   const [sortlogic, setsortlogic] = useState({ columnvalue: null, way: 'asc' });
 
+  const [searchFilter, setSearchFilter] = useState({ filterType: "contains", filterValue: "" });
+
   useEffect(() => {
     const finalterm = searchTerm.toLowerCase();
-    const filtered = data.filter((x) =>
-      Object.keys(x).some((key) => {
-        const value = x[key];
+    const filtered = data.filter((item) => {
+      const matchesSearch = Object.keys(item).some((key) => {
+        const value = item[key];
         if (typeof value === 'string')
           return value.toLowerCase().includes(finalterm);
-
-        if (typeof value === 'number') {
+        if (typeof value === 'number')
           return value.toString().includes(finalterm);
-        }
-        if (typeof value === 'boolean') {
+        if (typeof value === 'boolean')
           return (value ? "yes" : "no").includes(finalterm);
-        }
-        if (value instanceof Date) {
+        if (value instanceof Date)
           return value.toLocaleDateString().includes(finalterm) || value.toLocaleString().includes(finalterm);
-        }
         return false;
-      })
-    );
+      });
+
+
+      return matchesSearch;
+    });
     setFilteredData(filtered);
   }, [searchTerm, data]);
+
+  useEffect(() => {
+    const { filterType, filterValue } = searchFilter;
+    const filtered = data.filter((item) => {
+      return Object.keys(item).some((key) => {
+        const value = item[key];
+        if (typeof value !== 'string') return true;
+        switch (filterType) {
+          case 'contains':
+            return value.toLowerCase().includes(filterValue.toLowerCase());
+          case 'notContains':
+            return !value.toLowerCase().includes(filterValue.toLowerCase());
+          case 'equals':
+            return value.toLowerCase() === filterValue.toLowerCase();
+          case 'notEquals':
+            return value.toLowerCase() !== filterValue.toLowerCase();
+          case 'startsWith':
+            return value.toLowerCase().startsWith(filterValue.toLowerCase());
+          case 'endsWith':
+            return value.toLowerCase().endsWith(filterValue.toLowerCase());
+          case 'isNull':
+            return value === null || value === undefined || value === '';
+          case 'isNotNull':
+            return value !== null && value !== undefined && value !== '';
+          default:
+            return true;
+        }
+      });
+    });
+    setFilteredData(filtered);
+  }, [searchFilter, data]);
+
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
+
 
   const sortData = (key) => {
     let direction = 'asc';
@@ -259,6 +294,11 @@ function App() {
     setFilteredData(sortedData);
   };
 
+  const handleSearchFilterChange = (filterType, filterValue) => {
+    setSearchFilter({ filterType, filterValue });
+  };
+
+
 
   return (
     <div className="App">
@@ -270,6 +310,8 @@ function App() {
         style={{ marginBottom: "20px", padding: "5px" }}
       />
       <h4> TIP :- to do any sort on column click on that column</h4>
+      <StringFilter onFilterChange={handleSearchFilterChange} />
+      {/* <button onClick={applyStringFilter}>Apply String Filter</button> */}
       <Table data={filteredData} sortData={sortData} sortlogic={sortlogic} />
     </div>
   );
