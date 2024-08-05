@@ -1,9 +1,10 @@
 
 import './App.css';
 import { useState, useEffect } from 'react';
+import Table from './components/Table';
 function App() {
 
-  const data = [
+  const tempdata = [
     {
       id: 1,
       name: "Alice Johnson",
@@ -201,10 +202,41 @@ function App() {
     }
   ];
 
-  console.log(data);
+  console.log(tempdata);
+
+  const [data, setData] = useState(tempdata);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+
+
+
+  useEffect(() => {
+    const finalterm = searchTerm.toLowerCase();
+    const filtered = data.filter((x) =>
+      Object.keys(x).some(
+        (key) =>
+          typeof x[key] === "string" &&
+          x[key].toLowerCase().includes(finalterm)
+      )
+    );
+    setFilteredData(filtered);
+  }, [searchTerm, data]);
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
   return (
     <div className="App">
-      <h2>Hello</h2>
+      <input
+        type="text"
+        placeholder="Search here"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        style={{ marginBottom: "20px", padding: "5px" }}
+      />
+
+      <Table data={filteredData} />
     </div>
   );
 }
